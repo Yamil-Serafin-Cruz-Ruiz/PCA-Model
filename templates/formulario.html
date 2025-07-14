@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Predicción de Supervivencia</title>
+<link rel="icon" href="https://raw.githubusercontent.com/iconoir-icons/iconoir/main/svg/ship.svg" type="image/svg+xml">
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
         
@@ -395,11 +397,11 @@
             const resultContainer = document.getElementById('resultContainer');
 
             // Mostrar resultado si existe
-            //{% if resultado %}
+            {% if resultado %}
             setTimeout(function() {
                 showResult();
             }, 500);
-            //{% endif %}
+            {% endif %}
 
             form.addEventListener('submit', function(e) {
                 // Mostrar estado de carga
