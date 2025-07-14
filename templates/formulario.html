@@ -1,47 +1,457 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <title>Predicción de Supervivencia</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f1e8 0%, #e8dcc0 100%);
+            font-family: 'Crimson Text', serif;
+            color: #5d4e37;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #faf7f0;
+            border: 3px solid #d4af37;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(93, 78, 55, 0.3);
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 10px,
+                rgba(212, 175, 55, 0.05) 10px,
+                rgba(212, 175, 55, 0.05) 20px
+            );
+            pointer-events: none;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .ship-icon {
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 2.5em;
+            color: #8b4513;
+            text-shadow: 2px 2px 4px rgba(139, 69, 19, 0.3);
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+        
+        .subtitle {
+            font-style: italic;
+            color: #a0826d;
+            font-size: 1.1em;
+            margin-bottom: 20px;
+        }
+        
+        .ornament {
+            width: 100px;
+            height: 2px;
+            background: linear-gradient(to right, transparent, #d4af37, transparent);
+            margin: 0 auto;
+        }
+        
+        form {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            color: #6b4423;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+            text-transform: capitalize;
+        }
+        
+        input[type="number"],
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #d4af37;
+            border-radius: 8px;
+            background: #fefcf7;
+            font-family: 'Crimson Text', serif;
+            font-size: 1em;
+            color: #5d4e37;
+            transition: all 0.3s ease;
+        }
+        
+        input[type="number"]:focus,
+        input[type="text"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #b8860b;
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
+            background: #ffffff;
+        }
+        
+        select {
+            cursor: pointer;
+        }
+        
+        .submit-container {
+            text-align: center;
+            margin-top: 35px;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
+            color: #faf7f0;
+            border: none;
+            padding: 15px 40px;
+            font-family: 'Cinzel', serif;
+            font-size: 1.2em;
+            font-weight: 600;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        button:hover {
+            background: linear-gradient(135deg, #b8860b 0%, #9a7209 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(212, 175, 55, 0.6);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .loading-spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top: 2px solid #faf7f0;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .result-container {
+            margin-top: 30px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+            position: relative;
+            z-index: 1;
+            display: none;
+        }
+        
+        .result-container.show {
+            opacity: 1;
+            transform: translateY(0);
+            display: block;
+        }
+        
+        .result {
+            background: linear-gradient(135deg, #f4f1e8 0%, #e8dcc0 100%);
+            border: 3px solid #d4af37;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(93, 78, 55, 0.2);
+        }
+        
+        .result::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #d4af37, #b8860b, #d4af37);
+            border-radius: 15px;
+            z-index: -1;
+            animation: borderGlow 3s ease-in-out infinite;
+        }
+        
+        @keyframes borderGlow {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+        
+        .result-icon {
+            margin-bottom: 20px;
+        }
+        
+        .result h2 {
+            font-family: 'Cinzel', serif;
+            color: #8b4513;
+            font-size: 1.8em;
+            text-shadow: 2px 2px 4px rgba(139, 69, 19, 0.3);
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+        
+        .result-text {
+            font-size: 1.3em;
+            color: #6b4423;
+            font-weight: 600;
+            background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+        }
+        
+        .result-description {
+            font-style: italic;
+            color: #a0826d;
+            font-size: 1em;
+            line-height: 1.6;
+        }
+        
+        .decorative-border {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 10px;
+            pointer-events: none;
+        }
+        
+        .close-result {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            color: #8b4513;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .close-result:hover {
+            background: rgba(212, 175, 55, 0.2);
+            transform: rotate(90deg);
+        }
+    </style>
 </head>
-
 <body>
-    <h1>Formulario de Predicción</h1>
-    <form action="/predecir" method="post">
-        <label>Sexo:
-            <select name="Sex_male">
-                <option value="1">Hombre</option>
-                <option value="0">Mujer</option>
-            </select>
-        </label><br><br>
+    <div class="container">
+        <div class="decorative-border"></div>
+        
+        <div class="header">
+            <div class="ship-icon">
+                <svg width="80" height="60" viewBox="0 0 100 75" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M10 55 L90 55 L85 65 L15 65 Z" fill="#8b4513" stroke="#5d4e37" stroke-width="2"/>
+                    <path d="M20 55 L20 25 L35 25 L35 55" fill="#d4af37" stroke="#b8860b" stroke-width="1"/>
+                    <path d="M40 55 L40 15 L55 15 L55 55" fill="#d4af37" stroke="#b8860b" stroke-width="1"/>
+                    <path d="M60 55 L60 20 L75 20 L75 55" fill="#d4af37" stroke="#b8860b" stroke-width="1"/>
+                    <path d="M25 25 L25 10 L50 10 L50 25" fill="#faf7f0" stroke="#8b4513" stroke-width="1"/>
+                    <path d="M45 15 L45 5 L70 5 L70 15" fill="#faf7f0" stroke="#8b4513" stroke-width="1"/>
+                    <circle cx="30" cy="35" r="3" fill="#5d4e37"/>
+                    <circle cx="47" cy="30" r="3" fill="#5d4e37"/>
+                    <circle cx="67" cy="35" r="3" fill="#5d4e37"/>
+                </svg>
+            </div>
+            
+            <h1>Predicción de Supervivencia</h1>
+            <p class="subtitle">Formulario de Análisis Marítimo</p>
+            <div class="ornament"></div>
+        </div>
 
-        <label>Edad:
-            <input type="number" step="any" name="Age" required>
-        </label><br><br>
+        <form action="/predecir" method="post" id="predictionForm">
+            <div class="form-group">
+                <label>Sexo:</label>
+                <select name="Sex_male">
+                    <option value="1">Hombre</option>
+                    <option value="0">Mujer</option>
+                </select>
+            </div>
 
-        <label>Tarifa (Fare):
-            <input type="number" step="any" name="Fare" required>
-        </label><br><br>
+            <div class="form-group">
+                <label>Edad:</label>
+                <input type="number" step="any" name="Age" required>
+            </div>
 
-        <label>Clase (Pclass):
-            <select name="Pclass">
-                <option value="1">Primera</option>
-                <option value="2">Segunda</option>
-                <option value="3">Tercera</option>
-            </select>
-        </label><br><br>
+            <div class="form-group">
+                <label>Tarifa (Fare):</label>
+                <input type="number" step="any" name="Fare" required>
+            </div>
 
-        <label>Cabina (ej. C123):
-            <input type="text" name="Cabina" required>
-        </label>
+            <div class="form-group">
+                <label>Clase (Pclass):</label>
+                <select name="Pclass">
+                    <option value="1">Primera</option>
+                    <option value="2">Segunda</option>
+                    <option value="3">Tercera</option>
+                </select>
+            </div>
 
-        <button type="submit">Predecir</button>
-    </form>
+            <div class="form-group">
+                <label>Cabina (ej. B938):</label>
+                <input type="text" name="Cabina" required>
+            </div>
 
-    {% if resultado %}
-    <h2>Resultado: {{ resultado }}</h2>
-    {% endif %}
+            <div class="submit-container">
+                <button type="submit" id="submitBtn">
+                    <div class="loading-spinner" id="loadingSpinner"></div>
+                    <span id="buttonText">Predecir</span>
+                </button>
+            </div>
+        </form>
+
+        {% if resultado %}
+        <div class="result-container" id="resultContainer">
+            <div class="result">
+                <button class="close-result" onclick="hideResult()" title="Cerrar resultado">×</button>
+                
+                <div class="result-icon">
+                    <svg width="60" height="60" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="50" cy="50" r="45" fill="#d4af37" stroke="#b8860b" stroke-width="3"/>
+                        <path d="M35 50 L45 60 L65 40" stroke="#faf7f0" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                
+                <h2>Análisis Completado</h2>
+                <div class="result-text" id="resultText">{{ resultado }}</div>
+                <div class="result-description">
+                    El análisis ha sido procesado utilizando algoritmos avanzados de predicción marítima basados en datos históricos.
+                </div>
+                <div class="ornament" style="margin-top: 20px;"></div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('predictionForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const buttonText = document.getElementById('buttonText');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const resultContainer = document.getElementById('resultContainer');
+
+            // Mostrar resultado si existe
+            //{% if resultado %}
+            setTimeout(function() {
+                showResult();
+            }, 500);
+            //{% endif %}
+
+            form.addEventListener('submit', function(e) {
+                // Mostrar estado de carga
+                submitBtn.disabled = true;
+                buttonText.textContent = 'Analizando...';
+                loadingSpinner.style.display = 'inline-block';
+                
+                // Ocultar resultado anterior si existe
+                hideResult();
+            });
+        });
+
+        function showResult() {
+            const resultContainer = document.getElementById('resultContainer');
+            resultContainer.classList.add('show');
+            
+            // Scroll suave hacia el resultado
+            setTimeout(function() {
+                resultContainer.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center' 
+                });
+            }, 300);
+        }
+
+        function hideResult() {
+            const resultContainer = document.getElementById('resultContainer');
+            resultContainer.classList.remove('show');
+            
+            // Resetear botón
+            const submitBtn = document.getElementById('submitBtn');
+            const buttonText = document.getElementById('buttonText');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            
+            submitBtn.disabled = false;
+            buttonText.textContent = 'Predecir';
+            loadingSpinner.style.display = 'none';
+        }
+
+        // Función para interpretar el resultado y mostrar descripción personalizada
+        function interpretResult(resultado) {
+            const resultText = document.getElementById('resultText');
+            const resultDescription = document.querySelector('.result-description');
+            
+            if (resultado.toLowerCase().includes('sobrevive') || resultado.toLowerCase().includes('supervivencia')) {
+                resultDescription.innerHTML = '¡Excelentes noticias! Según nuestro análisis, las probabilidades de supervivencia son favorables basándose en los parámetros proporcionados.';
+            } else if (resultado.toLowerCase().includes('no sobrevive') || resultado.toLowerCase().includes('fallece')) {
+                resultDescription.innerHTML = 'Según el análisis de los datos históricos, las probabilidades de supervivencia son menores. Este resultado se basa en patrones estadísticos del evento marítimo.';
+            } else {
+                resultDescription.innerHTML = 'El análisis ha sido procesado utilizando algoritmos avanzados de predicción marítima basados en datos históricos.';
+            }
+        }
+    </script>
 </body>
-
 </html>
