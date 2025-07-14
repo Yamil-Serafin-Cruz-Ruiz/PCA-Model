@@ -3,8 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>Predicción de Supervivencia</title>
-<link rel="icon" href="https://raw.githubusercontent.com/iconoir-icons/iconoir/main/svg/ship.svg" type="image/svg+xml">
-
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
         
@@ -188,17 +186,12 @@
         
         .result-container {
             margin-top: 30px;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.5s ease;
             position: relative;
             z-index: 1;
             display: none;
         }
         
         .result-container.show {
-            opacity: 1;
-            transform: translateY(0);
             display: block;
         }
         
@@ -220,15 +213,9 @@
             left: -2px;
             right: -2px;
             bottom: -2px;
-            background: linear-gradient(45deg, #d4af37, #b8860b, #d4af37);
+            background: #d4af37;
             border-radius: 15px;
             z-index: -1;
-            animation: borderGlow 3s ease-in-out infinite;
-        }
-        
-        @keyframes borderGlow {
-            0%, 100% { opacity: 0.5; }
-            50% { opacity: 1; }
         }
         
         .result-icon {
@@ -298,6 +285,11 @@
             background: rgba(212, 175, 55, 0.2);
             transform: rotate(90deg);
         }
+
+        @keyframes borderGlow {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
     </style>
 </head>
 <body>
@@ -353,7 +345,7 @@
             </div>
 
             <div class="form-group">
-                <label>Cabina (ej. B938):</label>
+                <label>Cabina (ej. C123):</label>
                 <input type="text" name="Cabina" required>
             </div>
 
@@ -417,14 +409,6 @@
         function showResult() {
             const resultContainer = document.getElementById('resultContainer');
             resultContainer.classList.add('show');
-            
-            // Scroll suave hacia el resultado
-            setTimeout(function() {
-                resultContainer.scrollIntoView({ 
-                    behavior: 'smooth', 
-                    block: 'center' 
-                });
-            }, 300);
         }
 
         function hideResult() {
