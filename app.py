@@ -1,5 +1,4 @@
 from flask import Flask, render_template, request
-import pickle
 import numpy as np
 import joblib
 
@@ -15,13 +14,13 @@ with open("pca_model.pkl", "rb") as f:
 with open("survived_knn_classifier.pkl", "rb") as f:
     knn = joblib.load(f)
 
-# Función para codificar la cabina por letra
+# Codificación de cabina basada en letra
 def codificar_cabina(cabina_str):
     if not cabina_str:
-        return 0  # Por ejemplo, si está vacía
+        return 0
     letra = cabina_str[0].upper()
     letras_cabina = {'A': 1, 'B': 2, 'C': 3, 'D': 4, 'E': 5, 'F': 6, 'G': 7}
-    return letras_cabina.get(letra, 0)  # Si no está en el diccionario, devuelve 0
+    return letras_cabina.get(letra, 0)
 
 @app.route('/')
 def index():
@@ -30,7 +29,7 @@ def index():
 @app.route('/predecir', methods=["POST"])
 def predecir():
     try:
-        # Obtener los datos del formulario
+        # Recoger datos del formulario
         sex_male = int(request.form.get("Sex_male"))
         age = float(request.form.get("Age"))
         fare = float(request.form.get("Fare"))
@@ -38,8 +37,14 @@ def predecir():
         cabina_str = request.form.get("Cabina")
         cabina_codificada = codificar_cabina(cabina_str)
 
-        # Crear arreglo de características
-        features = np.array([[sex_male, age, fare, pclass, cabina_codificada]])
+        # Asignar valores por defecto para columnas faltantes
+        sibsp = 0
+        parch = 0
+        embarked = 0
+
+        # Construir el vector de entrada (8 columnas esperadas)
+        # ['Pclass', 'Age', 'SibSp', 'Parch', 'Fare', 'Embarked', 'Sex_male', 'Cabina']
+        features = np.array([[pclass, age, sibsp, parch, fare, embarked, sex_male, cabina_codificada]])
 
         # Preprocesamiento
         features_scaled = scaler.transform(features)
