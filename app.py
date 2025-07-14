@@ -1,18 +1,19 @@
 from flask import Flask, render_template, request
 import pickle
 import numpy as np
+import joblib
 
 app = Flask(__name__)
 
 # Cargar modelos
 with open("scaler.pkl", "rb") as f:
-    scaler = pickle.load(f)
+    scaler = joblib.load(f)
 
 with open("pca_model.pkl", "rb") as f:
-    pca = pickle.load(f)
+    pca = joblib.load(f)
 
 with open("survived_knn_classifier.pkl", "rb") as f:
-    knn = pickle.load(f)
+    knn = joblib.load(f)
 
 # Función para codificar la cabina por letra
 def codificar_cabina(cabina_str):
